@@ -88,7 +88,9 @@ class ShredWorker(QThread):
         cmd = ["pkexec"] + shred_cmd if use_pkexec else shred_cmd
 
         try:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            proc = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+            )
         except Exception as e:
             self.output.emit(f"Failed to start shred: {e}\n")
             self.finished.emit(1)
@@ -111,8 +113,14 @@ class MainWindow(QWidget):
         header = QHBoxLayout()
         self.layout.addLayout(header)
 
-        header.addWidget(QLabel("<b>Secure Wipe — select a device to securely erase</b>"))
-        header.addItem(QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        header.addWidget(
+            QLabel("<b>Secure Wipe — select a device to securely erase</b>")
+        )
+        header.addItem(
+            QSpacerItem(
+                40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+            )
+        )
 
         about_btn = QPushButton("About / Safety")
         about_btn.clicked.connect(self.show_about)
@@ -129,7 +137,9 @@ class MainWindow(QWidget):
         # Table for devices
         self.table = QTableWidget()
         self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["Type", "Path", "Size", "Vendor", "Model", "Transport"])
+        self.table.setHorizontalHeaderLabels(
+            ["Type", "Path", "Size", "Vendor", "Model", "Transport"]
+        )
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
@@ -167,11 +177,15 @@ class MainWindow(QWidget):
         self.refresh_devices()
 
     def show_about(self):
-        QMessageBox.information(self, "About & Safety", (
-            "This tool lists block devices using 'lsblk' and uses 'shred' to overwrite them.\n\n"
-            "⚠️ Wiping is irreversible. Double-check the device path before confirming.\n"
-            "You may be prompted for admin rights using 'pkexec'."
-        ))
+        QMessageBox.information(
+            self,
+            "About & Safety",
+            (
+                "This tool lists block devices using 'lsblk' and uses 'shred' to overwrite them.\n\n"
+                "⚠️ Wiping is irreversible. Double-check the device path before confirming.\n"
+                "You may be prompted for admin rights using 'pkexec'."
+            ),
+        )
 
     def refresh_devices(self):
         self.refresh_btn.setEnabled(False)
@@ -205,15 +219,17 @@ class MainWindow(QWidget):
             return "🔌 USB"
         try:
             if d.rota is not None and int(d.rota) == 1:
-                return "🟠 HDD"
+                return "💽 HDD"
         except Exception:
             pass
-        return "⚫ SSD"
+        return "💾 SSD"
 
     def on_device_selected(self, row, col):
         self.update_device_selection(row)
 
-    def on_device_selected_keyboard(self, current_row, current_col, previous_row, previous_col):
+    def on_device_selected_keyboard(
+        self, current_row, current_col, previous_row, previous_col
+    ):
         if current_row >= 0:
             self.update_device_selection(current_row)
 
@@ -246,7 +262,9 @@ class MainWindow(QWidget):
             f"Type the device path to confirm (e.g. {d.path}):",
         )
         if not ok or confirm_text.strip() != d.path:
-            QMessageBox.warning(self, "Confirmation Failed", "Device path did not match. Aborting.")
+            QMessageBox.warning(
+                self, "Confirmation Failed", "Device path did not match. Aborting."
+            )
             return
 
         self.wipe_btn.setEnabled(False)
@@ -264,7 +282,9 @@ class MainWindow(QWidget):
             QMessageBox.information(self, "Done", "Shred completed successfully.")
         else:
             self.output_console.append(f"\nShred exited with code {exit_code}")
-            QMessageBox.warning(self, "Shred Failed", f"Shred exited with code {exit_code}")
+            QMessageBox.warning(
+                self, "Shred Failed", f"Shred exited with code {exit_code}"
+            )
 
         self.wipe_btn.setEnabled(True)
         self.refresh_btn.setEnabled(True)
