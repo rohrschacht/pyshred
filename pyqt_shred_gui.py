@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QHeaderView,
+    QInputDialog,
 )
 
 
@@ -83,7 +84,7 @@ class ShredWorker(QThread):
         self.passes = passes
 
     def run(self):
-        shred_cmd = ["shred", "-v", f"-n", str(self.passes), self.device_path]
+        shred_cmd = ["shred", "-vz", f"-n", str(self.passes), self.device_path]
         use_pkexec = (os.geteuid() != 0) and shutil.which("pkexec") is not None
         cmd = ["pkexec"] + shred_cmd if use_pkexec else shred_cmd
 
@@ -256,7 +257,7 @@ class MainWindow(QWidget):
         if reply != QMessageBox.StandardButton.Yes:
             return
 
-        confirm_text, ok = QMessageBox.getText(
+        confirm_text, ok = QInputDialog.getText(
             self,
             "Type to Confirm",
             f"Type the device path to confirm (e.g. {d.path}):",
