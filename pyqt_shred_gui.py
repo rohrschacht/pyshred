@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 PyQt6 GUI for listing storage devices and securely wiping them with `shred`.
-Table now stretches columns to fit parent width.
+Now updates device details when navigating with arrow keys in the table.
 """
 
 import sys
@@ -134,6 +134,7 @@ class MainWindow(QWidget):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.cellClicked.connect(self.on_device_selected)
+        self.table.currentCellChanged.connect(self.on_device_selected_keyboard)
         # Stretch columns to fill available width
         header_view = self.table.horizontalHeader()
         header_view.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -210,6 +211,13 @@ class MainWindow(QWidget):
         return "⚫ SSD"
 
     def on_device_selected(self, row, col):
+        self.update_device_selection(row)
+
+    def on_device_selected_keyboard(self, current_row, current_col, previous_row, previous_col):
+        if current_row >= 0:
+            self.update_device_selection(current_row)
+
+    def update_device_selection(self, row: int):
         d = self.devices[row]
         self.selected_device = d
         self.details_label.setText(
